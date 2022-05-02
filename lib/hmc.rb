@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "hmc/version"
+require_relative "hmc/option"
 require "tty-prompt"
 
 module Hmc
@@ -19,16 +20,16 @@ module Hmc
 
   while true
     if !prefs
-      weight = 0
-      option = prompt.ask("Please enter option #{index}:")
-      weight = prompt.ask("How strongly are you leaning towards #{option}? (1-10):").to_i do |q|
-        q.in "1-10"
-      end
+      option = Hmc::Option.new(
+        prompt.ask("Please enter option #{index}:"),
+        prompt.ask("How strongly are you leaning towards #{option.description}? (1-10):").to_i do |q|
+          q.in "1-10"
+        end
+      )
       options.fill(option, options.size, weight)
       index += 1
     else
-      option = prompt.ask("Please enter option #{index}:")
-      options << option
+      options << Hmc::Option.new(prompt.ask("Please enter option #{index}:"))
       index += 1
     end
 
@@ -37,8 +38,8 @@ module Hmc
     puts "\nCurrent options:\n"
     options.each do |option|
       unless printed.include?(option)
-        puts option
-        printed << option
+        puts option.description
+        printed << option.description
       end
     end
     puts
@@ -53,5 +54,5 @@ module Hmc
   end
 
   puts "\nFinal decision(s): \n"
-  final_options.each { |opt| puts "- #{opt}" }
+  final_options.each { |opt| puts "- #{opt.description}" }
 end
